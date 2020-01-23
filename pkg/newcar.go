@@ -1,4 +1,4 @@
-package main
+package newcar
 
 import "fmt"
 
@@ -30,24 +30,4 @@ func newCar(model string, color string) Car {
 	}
 
 	return c
-}
-
-func main() {
-
-	m := make(map[string]Car)
-
-	m["Nissan"] = newCar("Skyline", "blue")
-	m["Tesla"] = newCar("Roadster", "white")
-	m["Toyota"] = newCar("Supra", "black")
-	m["Chevrolet"] = newCar("Corvette", "red")
-	m["Dodge"] = newCar("Viper", "Silver")
-
-	for _, v := range m {
-		// fmt.Println(k, v.Model)
-
-		// if k == "Nissan" {
-		fmt.Println(v.Model)
-		v.Start()
-		// }
-	}
 }
