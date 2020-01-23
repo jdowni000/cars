@@ -1,3 +1,3 @@
-module jdowni000/cars
+module github.com/jdowni000/cars
 
 go 1.13
