@@ -1,6 +1,8 @@
 package carcreator
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Car type
 type Car struct {
