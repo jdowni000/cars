@@ -18,21 +18,22 @@ func handleCarRequest(resp http.ResponseWriter, req *http.Request) {
 
 	m := make(map[string]carcreator.Car)
 
-	m["Nissan"] = carcreator.NewCar("Skyline", "blue")
-	m["Tesla"] = carcreator.NewCar("Roadster", "white")
-	m["Toyota"] = carcreator.NewCar("Supra", "black")
-	m["Chevrolet"] = carcreator.NewCar("Corvette", "red")
-	m["Dodge"] = carcreator.NewCar("Viper", "Silver")
+	m["Nissan"] = carcreator.NewCarWithOutput("Skyline", "blue", resp)
+	m["Tesla"] = carcreator.NewCarWithOutput("Roadster", "white", resp)
+	m["Toyota"] = carcreator.NewCarWithOutput("Supra", "black", resp)
+	m["Chevrolet"] = carcreator.NewCarWithOutput("Corvette", "red", resp)
+	m["Dodge"] = carcreator.NewCarWithOutput("Viper", "Silver", resp)
+
+	if "Skyline" != userCar {
+		resp.Write([]byte("Dude pick a real car like a Skyline"))
+		return
+	}
 
 	for k, v := range m {
-		if v.Model == userCar {
+		if userCar == v.Model {
 			resp.Write([]byte("The company that makes your car is " + k + "\n"))
 			v.Start()
 			v.Drive(200)
-		} else {
-			resp.Write([]byte("Dude, pick a real car like a Skyline, Roadster, Supra, Corvette, or Viper"))
 		}
-
 	}
-
 }
