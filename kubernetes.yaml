@@ -1,0 +1,132 @@
+# First, we setup a deployment, which is responsible for deploying pod sfrom
+# a template.  The deployment is also responsible for doing application
+# rolling-updates.  A deployment will automatically do a rolling update if
+# its image URL is updated.
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: car-server
+  name: car-server
+  namespace: default
+spec:
+  # We can set replicas here statically, or you can check out HPAs (horizontal
+  # pod autoscaler) to automatically scale your application out with load.
+  strategy:
+    rollingUpdate:
+      maxSurge: 1 # we can make one surplus pod while rolling out updates
+      maxUnavailable: 1 # only one pod below the replicas count can be down
+    type: RollingUpdate
+  selector:
+    matchLabels: # these labels must match the pod template used
+      app: car-server
+  template:
+    metadata:
+      labels: # these labels must match the select (matchLabels) of the deployment
+        app: car-server
+      namespace: default
+    spec:
+      affinity: # many types of affinity and anti-affinity are availble - check the docs!
+        podAntiAffinity: # avoid pods with settings below
+          preferredDuringSchedulingIgnoredDuringExecution: # other options include disallowing scheduling entirely if two pods are on the same node
+          - weight: 100 # only used if multiple rules are in place and conflict
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                - key: app # this is the key of the label on the pod we want to avoid
+                  operator: In
+                  values:
+                  - car-server # this is the value of the label on the pod we want to avoid
+      containers: # you may have multiple containers that share a hostname and network stack
+      - name: temp
+        image: jdowni000/temp:testing # this is the URL to the docker image to use. docker hub is assumed by default
+        env:
+        - name: ENV_VAR
+          value: "env var value"
+        livenessProbe: # if a liveness probe does not pass, the pod will be removed from the load balancer and eventually restarted
+          failureThreshold: 3
+          initialDelaySeconds: 2
+          periodSeconds: 15
+          successThreshold: 1
+          tcpSocket:
+            port: 80
+          timeoutSeconds: 1
+        readinessProbe: # if a readiness probe does not pass, the pod will not be put into the load balancer
+          failureThreshold: 3
+          initialDelaySeconds: 2
+          periodSeconds: 15
+          successThreshold: 1
+          tcpSocket:
+            port: 80
+          timeoutSeconds: 1
+        #args: ["--flag", "here"] # command line arguments
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 50m # millicores are 1/1000 of a full core
+            memory: 50Mi # Mi Gi GB and MB are all supported
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 5 # if sent an interrupt, the pod is allowed up to this long to exit gracefully
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: car-server-pdb
+  namespace: default
+spec:
+  minAvailable: 1 # only one pod that matches the selector below can be unavailable at any time
+  selector:
+    matchLabels:
+      app: car-server
+---
+# This service will be available as car-server.default (name . namespace)
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: "0.0.0.0/0" # use an internal load balancer, or remove for an external one
+    external-dns.alpha.kubernetes.io/hostname: "example-app.alpha.k8s.aort.theplatform.com." # create a DNS entry here. Must be under the cluster's VPC subdomain
+  name: car-server
+  namespace: default
+spec:
+  type: LoadBalancer # LoadBalancer indicates we want this service to have an external ELB.  By default, services are available only within the cluster
+  ports:
+  - port: 80 # listen publicly on 80
+    targetPort: 80 # forward requests to healthy pods matching the below selector on this port
+  selector:
+    app: car-server
+---
+# The HorizontalPodAutoscaler (hpa) is responsible for adjusting the number of replicas in a deployment as load changes
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: car-server
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: car-server
+  minReplicas: 2 # at least two replicas for redundancy (think of the PDB above here)
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 90 # we want all our pods to operate with 50% of their requested millicores
+# The following types can be used at the same time, or in replacement of, the CPU target use metric above
+#  - type: Pods
+#    pods:
+#      metricName: packets-per-second
+#      targetAverageValue: 1k
+#  - type: Object
+#    object:
+#      metricName: requests-per-second
+#      target:
+#        apiVersion: extensions/v1beta1
+#        kind: Ingress
+#        name: main-route
+#      targetValue: 10k
