@@ -2,7 +2,7 @@
 # a template.  The deployment is also responsible for doing application
 # rolling-updates.  A deployment will automatically do a rolling update if
 # its image URL is updated.
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   annotations:
@@ -51,7 +51,7 @@ spec:
           periodSeconds: 15
           successThreshold: 1
           tcpSocket:
-            port: 80
+            port: 8000
           timeoutSeconds: 1
         readinessProbe: # if a readiness probe does not pass, the pod will not be put into the load balancer
           failureThreshold: 3
@@ -59,7 +59,7 @@ spec:
           periodSeconds: 15
           successThreshold: 1
           tcpSocket:
-            port: 80
+            port: 8000
           timeoutSeconds: 1
         #args: ["--flag", "here"] # command line arguments
         imagePullPolicy: Always
@@ -95,7 +95,7 @@ spec:
   type: LoadBalancer # LoadBalancer indicates we want this service to have an external ELB.  By default, services are available only within the cluster
   ports:
   - port: 80 # listen publicly on 80
-    targetPort: 80 # forward requests to healthy pods matching the below selector on this port
+    targetPort: 8000 # forward requests to healthy pods matching the below selector on this port
   selector:
     app: car-server
 ---
