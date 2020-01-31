@@ -41,7 +41,7 @@ spec:
                   - car-server # this is the value of the label on the pod we want to avoid
       containers: # you may have multiple containers that share a hostname and network stack
       - name: temp
-        image: jdowni000/temp:v2 # this is the URL to the docker image to use. docker hub is assumed by batman
+        image: jdowni000/temp:v3 # this is the URL to the docker image to use. docker hub is assumed by batman
         env:
         - name: ENV_VAR
           value: "env var value"
@@ -87,7 +87,7 @@ kind: Service
 metadata:
   labels:
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-internal: "0.0.0.0/0" # use an internal load balancer, or remove for an external one
+    # service.beta.kubernetes.io/aws-load-balancer-internal: "0.0.0.0/0" # use an internal load balancer, or remove for an external one
     external-dns.alpha.kubernetes.io/hostname: "example-app.alpha.k8s.aort.theplatform.com." # create a DNS entry here. Must be under the cluster's VPC subdomain
   name: car-server
   namespace: batman

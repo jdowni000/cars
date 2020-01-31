@@ -24,8 +24,8 @@ func handleCarRequest(resp http.ResponseWriter, req *http.Request) {
 	m["Chevrolet"] = carcreator.NewCarWithOutput("Corvette", "red", resp)
 	m["Dodge"] = carcreator.NewCarWithOutput("Viper", "Silver", resp)
 
-	if "Roadster" != userCar {
-		resp.Write([]byte("Dude pick a real car like a Roadster"))
+	if "Supra" != userCar {
+		resp.Write([]byte("Dude pick a real car like a Supra"))
 		return
 	}
 
