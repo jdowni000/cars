@@ -35,7 +35,7 @@ func (c Car) Drive(miles float32) {
 		fmt.Fprintln(c.Output, c.Model, "new fuel level is", c.FuelTank)
 
 	}
-	fmt.Fprintln(c.Output, "After driving", miles, "the fuel level is at", c.FuelTank)
+	fmt.Fprintln(c.Output, "After driving", miles, "miles", "the fuel level is at", c.FuelTank)
 
 }
 
@@ -44,18 +44,22 @@ func NewCar(model string, color string) Car {
 	c := Car{
 		Model:        model,
 		Color:        color,
-		StartupSound: "Bang",
+		StartupSound: "The car starts: Bang",
 		MPG:          20.0,
 		FuelTank:     12.0,
 		Output:       os.Stdout,
 	}
 	if model == "Supra" {
 
-		c.StartupSound = "Vroom"
+		c.StartupSound = "The car starts: Vroom"
 	}
 
 	if model == "Skyline" {
-		c.StartupSound = "Boom"
+		c.StartupSound = "The car starts: Boom"
+	}
+
+	if model == "Roadster" {
+		c.StartupSound = "The car starts: Yo I didn't hear anything!"
 	}
 
 	return c

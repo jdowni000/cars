@@ -7,12 +7,15 @@ import (
 	"github.com/jdowni000/cars/pkg/carcreator"
 )
 
+// main opens web server
 func main() {
 	http.HandleFunc("/", handleCarRequest)
 	log.Println(http.ListenAndServe(":8000", nil))
 }
 
+// handleCarRequest takes in requests and writes to ResponseWriter
 func handleCarRequest(resp http.ResponseWriter, req *http.Request) {
+
 	userCar := req.FormValue("car")
 	resp.Write([]byte("Your vehicle is a " + userCar + "\n"))
 
@@ -24,8 +27,9 @@ func handleCarRequest(resp http.ResponseWriter, req *http.Request) {
 	m["Chevrolet"] = carcreator.NewCarWithOutput("Corvette", "red", resp)
 	m["Dodge"] = carcreator.NewCarWithOutput("Viper", "Silver", resp)
 
-	if "Supra" != userCar {
-		resp.Write([]byte("Dude pick a real car like a Supra"))
+	if "Roadster" != userCar {
+		resp.Write([]byte("Dude pick a real car like a Roadster"))
+
 		return
 	}
 
