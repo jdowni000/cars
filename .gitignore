@@ -1,1 +1,3 @@
 cmd/cars/cars
+cmd/car-server/car-server
+cmd/car-checker-car-checker
