@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bufio"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -10,28 +10,30 @@ import (
 )
 
 func main() {
-	ok := carChecker()
-	if !ok {
-		checkclient.ReportFailure([]string{"Test has failed!"})
+	err := carChecker()
+	if err != nil {
+		checkclient.ReportFailure([]string{err.Error()})
 		return
 	}
 	checkclient.ReportSuccess()
 }
 
-func carChecker() bool {
+func carChecker() error {
 	resp, err := http.Get("car-server.batman.svc.cluster.local?car=Roadster")
 	if err != nil {
-		log.fatal(err)
+		// checkclient.ReportFailure([]string{err.Error()})
+		return err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.fatal(err)
+		// checkclient.ReportFailure([]string{err.Error()})
+		return err
 	}
-	stringbody := strconv(body)
-	scanner := bufio.NewScanner(stringbody)
-	if strings.Contains(scanner.Text(), "driving mile 0") {
-		return true
+	stringbody := string(body)
+	// scanner := bufio.NewScanner(stringbody)
+	if strings.Contains(stringbody, "driving mile 0") {
+		return nil
 	}
-	return false
+	return errors.New("Did not find driving mile 0")
 }
