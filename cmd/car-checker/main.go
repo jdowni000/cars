@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	checkclient "github.com/Comcast/kuberhealthy/pkg/checks/external/checkClient"
+	checkclient "github.com/Comcast/kuberhealthy/pkg/checks/external/checkClient/v2"
 )
 
 func main() {
