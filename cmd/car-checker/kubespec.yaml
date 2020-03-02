@@ -7,6 +7,6 @@ spec:
   timeout: 2m # After this much time, Kuberhealthy will kill your check and consider it "failed"
   podSpec: # The exact pod spec that will run.  All normal pod spec is valid here.
     containers:
-    - image: jdowni000/car-checker:v1 # The image of the check you just pushed
+    - image: jdowni000/car-checker:v1.0.1 # The image of the check you just pushed
       imagePullPolicy: Always # During check development, it helps to set this to 'Always' to prevent on-node image caching.
       name: main
