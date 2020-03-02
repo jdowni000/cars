@@ -17,6 +17,7 @@ var TargetURL = os.Getenv("TARGET_URL")
 //TargetString variable set from YAML env
 var TargetString = os.Getenv("TARGET_STRING")
 
+// init verifies env are not empty from YAML
 func init() {
 	if TargetURL == "" {
 		log.Println("No URL provided in YAML")
@@ -29,6 +30,7 @@ func init() {
 	}
 }
 
+// main reports that the external checker has found problems
 func main() {
 	err := carChecker()
 	if err != nil {
@@ -38,11 +40,11 @@ func main() {
 	checkclient.ReportSuccess()
 }
 
+// carChecker	 reads through supplied URL for supplied string
 func carChecker() error {
 	log.Println("starting check")
 	resp, err := http.Get(TargetURL)
 	if err != nil {
-		// checkclient.ReportFailure([]string{err.Error()})
 		return err
 	}
 	defer resp.Body.Close()
@@ -50,11 +52,9 @@ func carChecker() error {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		// checkclient.ReportFailure([]string{err.Error()})
 		return err
 	}
 	stringbody := string(body)
-	// scanner := bufio.NewScanner(stringbody)
 	if strings.Contains(stringbody, TargetString) {
 		log.Println("found expected string")
 		return nil
