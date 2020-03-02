@@ -10,3 +10,8 @@ spec:
     - image: jdowni000/car-checker:v1.0.1 # The image of the check you just pushed
       imagePullPolicy: Always # During check development, it helps to set this to 'Always' to prevent on-node image caching.
       name: main
+      env:
+        - name: "TARGET_URL"
+          value: "http://car-server.batman.svc.cluster.local?car=Roadster"
+        - name: "TARGET_STRING"
+          value: "driving mile 0"

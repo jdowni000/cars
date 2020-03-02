@@ -5,10 +5,29 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	checkclient "github.com/Comcast/kuberhealthy/v2/pkg/checks/external/checkclient"
 )
+
+// TargetURL variable set from YAML env
+var TargetURL = os.Getenv("TARGET_URL")
+
+//TargetString variable set from YAML env
+var TargetString = os.Getenv("TARGET_STRING")
+
+func init() {
+	if TargetURL == "" {
+		log.Println("No URL provided in YAML")
+		return
+	}
+	if TargetString == "" {
+
+		log.Println("No string provided in YAML")
+		return
+	}
+}
 
 func main() {
 	err := carChecker()
@@ -21,7 +40,7 @@ func main() {
 
 func carChecker() error {
 	log.Println("starting check")
-	resp, err := http.Get("http://car-server.batman.svc.cluster.local?car=Roadster")
+	resp, err := http.Get(TargetURL)
 	if err != nil {
 		// checkclient.ReportFailure([]string{err.Error()})
 		return err
@@ -36,7 +55,7 @@ func carChecker() error {
 	}
 	stringbody := string(body)
 	// scanner := bufio.NewScanner(stringbody)
-	if strings.Contains(stringbody, "driving mile 0") {
+	if strings.Contains(stringbody, TargetString) {
 		log.Println("found expected string")
 		return nil
 	}
