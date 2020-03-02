@@ -61,5 +61,5 @@ func carChecker() error {
 	}
 	log.Println("did not find expected string")
 
-	return errors.New("Did not find driving mile 0")
+	return errors.New("Did not find wanted string")
 }
