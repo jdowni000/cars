@@ -17,31 +17,29 @@ var TargetURL = os.Getenv("TARGET_URL")
 //TargetString variable set from YAML env
 var TargetString = os.Getenv("TARGET_STRING")
 
-// init verifies env are not empty from YAML
-func init() {
+// main reports that the external checker has found problems and env is not empty
+func main() {
 	if TargetURL == "" {
 		log.Println("No URL provided in YAML")
-		return
+		os.Exit(1)
 	}
+
 	if TargetString == "" {
-
 		log.Println("No string provided in YAML")
-		return
+		os.Exit(1)
 	}
-}
 
-// main reports that the external checker has found problems
-func main() {
-	err := carChecker()
+	err := stringChecker()
 	if err != nil {
 		checkclient.ReportFailure([]string{err.Error()})
 		return
 	}
 	checkclient.ReportSuccess()
+
 }
 
-// carChecker	 reads through supplied URL for supplied string
-func carChecker() error {
+// stringChecker	 reads through supplied URL for supplied string
+func stringChecker() error {
 	log.Println("starting check")
 	resp, err := http.Get(TargetURL)
 	if err != nil {
