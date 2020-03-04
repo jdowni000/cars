@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,53 +10,65 @@ import (
 	checkclient "github.com/Comcast/kuberhealthy/v2/pkg/checks/external/checkclient"
 )
 
-// TargetURL variable set from YAML env
+// TargetURL retrieves URL that will be used to search for string in response body
 var TargetURL = os.Getenv("TARGET_URL")
 
-//TargetString variable set from YAML env
+// TargetString is the string that will be searched for in the server response body
 var TargetString = os.Getenv("TARGET_STRING")
 
-// main reports that the external checker has found problems and env is not empty
+// reportErrorAndStop reports to kuberhealthy of error and exits program when called
+func reportErrorAndStop(s string) {
+	log.Println(s)
+	checkclient.ReportFailure([]string{s})
+	os.Exit(1)
+}
+
 func main() {
+	// check to make sure URL is provided
 	if TargetURL == "" {
-		log.Println("No URL provided in YAML")
-		os.Exit(1)
+		reportErrorAndStop("No URL provided in YAML")
 	}
 
+	//check to make sure string is provided
 	if TargetString == "" {
-		log.Println("No string provided in YAML")
-		os.Exit(1)
+		reportErrorAndStop("No string provided in YAML")
 	}
 
-	err := stringChecker()
+	userURLstring, err := getURLContent(TargetURL)
 	if err != nil {
 		checkclient.ReportFailure([]string{err.Error()})
-		return
 	}
 	checkclient.ReportSuccess()
 
+	if findStringInContent(userURLstring, TargetString) {
+		checkclient.ReportSuccess()
+	}
+	checkclient.ReportFailure([]string{err.Error()})
+
 }
 
-// stringChecker	 reads through supplied URL for supplied string
-func stringChecker() error {
-	log.Println("starting check")
-	resp, err := http.Get(TargetURL)
+// getURLContent retrieves bytes and error from URL
+func getURLContent(url string) ([]byte, error) {
+	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		return []byte{}, err
 	}
-	defer resp.Body.Close()
-	log.Println("reading body content")
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
-	}
-	stringbody := string(body)
-	if strings.Contains(stringbody, TargetString) {
-		log.Println("found expected string")
-		return nil
-	}
-	log.Println("did not find expected string")
+		return []byte{}, err
 
-	return errors.New("Did not find wanted string")
+	}
+	defer resp.Body.Close()
+	return body, err
+
+}
+
+// findStringInContent parses through URL bytes for specified string and returns bool
+func findStringInContent(b []byte, s string) bool {
+
+	stringbody := string(b)
+	if strings.Contains(stringbody, s) {
+		return true
+	}
+	return false
 }

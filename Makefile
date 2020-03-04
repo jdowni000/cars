@@ -5,7 +5,7 @@ push:
 	docker push jdowni000/temp:v2
 
 buildkh:
-	docker build -f cmd/car-checker/Dockerfile -t jdowni000/car-checker:v1.0.1 .
+	docker build -f cmd/car-checker/Dockerfile -t jdowni000/car-checker:v1.1.1 .
 
 pushkh:
-	docker push jdowni000/car-checker:v1.0.1
+	docker push jdowni000/car-checker:v1.1.1
