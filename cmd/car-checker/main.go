@@ -18,9 +18,14 @@ var TargetString = os.Getenv("TARGET_STRING")
 
 // reportErrorAndStop reports to kuberhealthy of error and exits program when called
 func reportErrorAndStop(s string) {
-	log.Println(s)
-	checkclient.ReportFailure([]string{s})
-	os.Exit(1)
+	log.Println("attempting to report error to kuberhealthy:", s)
+	err := checkclient.ReportFailure([]string{s})
+	if err != nil {
+		log.Println("failed to report to kuberhealthy servers:", err)
+		os.Exit(1)
+	}
+	log.Println("successfully reported error to kuberhealthy servers")
+	os.Exit(0)
 }
 
 func main() {
@@ -34,18 +39,24 @@ func main() {
 		reportErrorAndStop("No string provided in YAML")
 	}
 
+	// attempt to fetch URL content and fail if we cannot
 	userURLstring, err := getURLContent(TargetURL)
 	if err != nil {
-		log.Println(err)
-		checkclient.ReportFailure([]string{err.Error()})
+		reportErrorAndStop(err.Error())
 	}
-	checkclient.ReportSuccess()
 
-	if findStringInContent(userURLstring, TargetString) {
-		checkclient.ReportSuccess()
+	// if we cannot find the content string the test has failed
+	if !findStringInContent(userURLstring, TargetString) {
+		reportErrorAndStop("could not find string in content")
 	}
-	log.Println(err)
-	checkclient.ReportFailure([]string{err.Error()})
+
+	// if nothing has failed the test is succesfull
+	err = checkclient.ReportSuccess()
+	if err != nil {
+		log.Println("failed to report success", err)
+		os.Exit(1)
+	}
+	log.Println("successfully reported to kuberhealthy servers")
 
 }
 
