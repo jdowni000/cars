@@ -36,6 +36,7 @@ func main() {
 
 	userURLstring, err := getURLContent(TargetURL)
 	if err != nil {
+		log.Println(err)
 		checkclient.ReportFailure([]string{err.Error()})
 	}
 	checkclient.ReportSuccess()
@@ -43,6 +44,7 @@ func main() {
 	if findStringInContent(userURLstring, TargetString) {
 		checkclient.ReportSuccess()
 	}
+	log.Println(err)
 	checkclient.ReportFailure([]string{err.Error()})
 
 }
